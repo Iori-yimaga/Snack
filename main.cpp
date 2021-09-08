@@ -4,16 +4,16 @@
 #include <conio.h>
 #include <iostream>
 
+// 主函数
 int main() {
 	char choice = 0; // 游戏选项
-	unsigned int speed = 0;
 	char cm = 0;     // 地图选项
 	int flag = 1;
 	// 初始化蛇
 	initGame();
 	system("cls");
-
 	menu();
+
 	writeChar(18, 10, "请选择地图模式：");
 	writeChar(18, 12, "1. 默认模式");
 	writeChar(18, 14, "2. 自编辑模式");
@@ -47,6 +47,7 @@ int main() {
 		choice = _getch();
 		switch (choice) {
 		case 新游戏: {
+			initSnack();
 			speed = choiceDiff();
 			startGame(speed);
 			break;
@@ -55,9 +56,14 @@ int main() {
 				// case 存档: {}
 		case 读档: {
 
+			writeChar(48, 28, "读档中...");
+			Sleep(500);
+			writeChar(48, 28, "          ");
+			loadArchives();
+			startGame(speed);
+			break;
 		}
 		case 结束游戏: {
-
 			exit(0);
 		}
 		default:

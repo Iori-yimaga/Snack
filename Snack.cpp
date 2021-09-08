@@ -11,6 +11,20 @@ char opp = RIGHT;
 char tDir = RIGHT;
 unsigned int score = 0;
 
+// 默认初始化蛇
+void initSnack() {
+	// 初始化蛇
+	snack[0].X = 10;
+	snack[0].Y = 20;
+	snack[1].X = 9;
+	snack[1].Y = 20;
+	snack[2].X = 8;
+	snack[2].Y = 20;
+	snack[3].X = 7;
+	snack[3].Y = 20;
+	int len = 4;
+}
+
 // 清除蛇
 void clearSnack() {
 	for (int i = 0; i < len; i++) {
@@ -23,12 +37,12 @@ int moveSnack() {
 	int tX = snack[0].X;
 	int tY = snack[0].Y;
 
-	// 不可回头
+	// 各种操作
 	if (_kbhit() && (op = _getch())) {
-		if ((op == UP && opp != DOWN) || (op == DOWN && opp != UP) || (op == LEFT && opp != RIGHT) || (op == RIGHT && opp != LEFT) || (op == 暂停继续) || (op == 结束游戏)) {
+		if ((op == UP && opp != DOWN) || (op == DOWN && opp != UP) || (op == LEFT && opp != RIGHT) || (op == RIGHT && opp != LEFT) || (op == 暂停继续) || (op == 结束游戏) || (op == 存档)) {
 			opp = op;
 			// 保存进入暂停前最后一次的操作（方向）
-			if (opp != 暂停继续 && opp != 结束游戏) {
+			if (opp != 暂停继续 && opp != 结束游戏 && opp != 存档) {
 				tDir = opp;
 			}
 			// 暂停继续操作
@@ -38,6 +52,7 @@ int moveSnack() {
 					op = _getch();
 				}
 				writeChar(18, 7, "游戏继续");
+				// 暂停3秒继续游戏
 				Sleep(3000);
 				writeChar(18, 7, "          ");
 				// 退出暂停后蛇按之前的方向移动
@@ -59,6 +74,35 @@ int moveSnack() {
 						break;
 					}
 				} while (opp != 'n');
+				// 暂停3秒继续游戏
+				Sleep(3000);
+				writeChar(47, 26, "                ");
+				writeChar(47, 27, "                ");
+				opp = tDir;
+			}
+			if (opp == 存档) {
+				writeChar(47, 26, "是否保存当前游戏？");
+				writeChar(47, 27, "  (y)es / (n)o ");
+				do {
+					opp = _getch();
+					switch (opp) {
+					case 'y': {
+						doArchives();
+						writeChar(48, 28, "存档成功");
+						Sleep(500);
+						writeChar(48, 28, "          ");
+						break;
+					}
+					case 'n': break;
+					default:
+						writeChar(48, 28, "非法输入");
+						Sleep(1000);
+						writeChar(48, 28, "          ");
+						break;
+					}
+				} while (opp != 'n');
+				// 暂停3秒继续游戏
+				Sleep(3000);
 				writeChar(47, 26, "                ");
 				writeChar(47, 27, "                ");
 				opp = tDir;

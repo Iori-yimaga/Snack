@@ -55,20 +55,10 @@ void menu() {
 
 // 初始化游戏
 void initGame() {
+	// 设定控制台
 	system("title 一起来玩蛇");
 	system("color 9F");
 	system("cls");
-
-	// 初始化蛇
-	snack[0].X = 10;
-	snack[0].Y = 20;
-	snack[1].X = 9;
-	snack[1].Y = 20;
-	snack[2].X = 8;
-	snack[2].Y = 20;
-	snack[3].X = 7;
-	snack[3].Y = 20;
-	int len = 4;
 
 	// BGM
 	PlaySoundA("bg.wav", NULL, SND_ASYNC | SND_NODEFAULT);
@@ -218,15 +208,15 @@ unsigned int choiceDiff() {
 		writeChar(18, 8, "  3.困难  ");
 		co = _getch();
 		switch (co) {
-		case '1': {speed = 简单; flag = 0; break; }
-		case '2': {speed = 一般; flag = 0; break; }
-		case '3': {speed = 困难; flag = 0; break; }
-		default: {
-			writeChar(19, 10, "非法输入");
-			Sleep(300);
-			writeChar(19, 10, "        ");
-			break;
-		}
+			case '1': {speed = 简单; flag = 0; break; }
+			case '2': {speed = 一般; flag = 0; break; }
+			case '3': {speed = 困难; flag = 0; break; }
+			default: {
+				writeChar(19, 10, "非法输入");
+				Sleep(300);
+				writeChar(19, 10, "        ");
+				break;
+			}
 		}
 	} while (flag);
 	writeChar(18, 5, "          ");
@@ -256,4 +246,88 @@ void startGame(unsigned int speed) {
 		speed -= (score % 10);
 		Sleep(speed);
 	}
+}
+
+// 存档
+void doArchives() {
+	// 打开文件
+	FILE* fp = NULL;
+	fopen_s(&fp, "archives.txt", "w");
+	// 记录当前速度、蛇的方向、分数、长度
+	fprintf(fp, "%d\t%c\t%d\t%d", speed, tDir, score, len);
+	// 回车分割
+	fprintf(fp, "\n");
+	// 获取蛇当前坐标
+	int sx = 0, sy = 0;
+	for (int i = 0; i < len; i++) {
+		sx = snack[i].X;
+		sy = snack[i].Y;
+		fprintf(fp, "(%d,%d)\t", sx, sy);
+	}
+	// 回车分割
+	fprintf(fp, "\n");
+	// 获取障碍物当前坐标
+	for (int i = 0; i < MAP_X;  i++) {
+		for (int j = 0; j < MAP_Y; j++) {
+			if (MAP[i][j] == OBSTACLE) {
+				fprintf(fp, "(%d,%d)\t", i, j);
+			}
+		}
+	}
+	// 回车分割
+	fprintf(fp, "\n");
+	// 获取食物当前坐标
+	for (int i = 0; i < MAP_X; i++) {
+		for (int j = 0; j < MAP_Y; j++) {
+			if (MAP[i][j] == FOOD) {
+				fprintf(fp, "(%d,%d)\t", i, j);
+			}
+		}
+	}
+	// 关闭文件
+	fclose(fp);
+	fp = NULL;
+}
+
+// 读取存档
+void loadArchives() {
+	FILE* fp = NULL;
+	fopen_s(&fp, "archives.txt", "r");
+
+	// 读取当前速度、蛇的方向、分数、长度
+	fscanf_s(fp, "%d\t%c\t%d\t%d", &speed, &tDir, 1, &score, &len);
+	opp = tDir;
+	// 分割回车
+	fscanf_s(fp, "\n");
+
+	// 读取蛇的坐标
+	int sx = 0, sy = 0;
+	for (int i = 0; i < len; i++) {
+		fscanf_s(fp, "(%d,%d)\t", &sx, &sy);
+		snack[i].X = sx;
+		snack[i].Y = sy;
+	}
+	// 分割回车
+	fscanf_s(fp, "\n");
+
+	// 读取障碍物当前坐标
+	for (int i = 0; i < MAP_X; i++) {
+		for (int j = 0; j < MAP_Y; j++) {
+			fscanf_s(fp, "(%d,%d)\t", &i, &j);
+			MAP[i][j] = OBSTACLE;
+		}
+	}
+	// 分割回车
+	fscanf_s(fp, "\n");
+
+	// 读取食物当前坐标
+	for (int i = 0; i < MAP_X; i++) {
+		for (int j = 0; j < MAP_Y; j++) {
+			fscanf_s(fp, "(%d,%d)", &i, &j);
+			MAP[i][j] = FOOD;
+		}
+	}
+	// 关闭文件
+	fclose(fp);
+	fp = NULL;
 }

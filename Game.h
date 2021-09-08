@@ -42,4 +42,6 @@ void initMap();                               // 默认地图
 void custoMap();                              // 自编辑地图
 void createFood();                            // 生成食物
 void mouseLoop();                             // 获取鼠标事件
+void doArchives();                            // 存档
+void loadArchives();                          // 存档
 void writeChar(int x, int y, const char* ch);
