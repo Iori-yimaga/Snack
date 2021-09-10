@@ -4,8 +4,10 @@
 #include <Windows.h>
 #include <iostream>
 
+// 结构体数组
 Snack snack[100];
 int len = 4;
+// 初始取右
 char op = RIGHT;
 char opp = RIGHT;
 char tDir = RIGHT;
@@ -81,6 +83,7 @@ int moveSnack() {
 				opp = tDir;
 			}
 			if (opp == 存档) {
+				int flag = 1;
 				writeChar(47, 26, "是否保存当前游戏？");
 				writeChar(47, 27, "  (y)es / (n)o ");
 				do {
@@ -90,21 +93,22 @@ int moveSnack() {
 						doArchives();
 						writeChar(48, 28, "存档成功");
 						Sleep(500);
-						writeChar(48, 28, "          ");
+						writeChar(48, 28, "           ");
+						flag = 0;
 						break;
 					}
-					case 'n': break;
+					case 'n': flag = 0; break;
 					default:
 						writeChar(48, 28, "非法输入");
 						Sleep(1000);
-						writeChar(48, 28, "          ");
+						writeChar(48, 28, "           ");
 						break;
 					}
-				} while (opp != 'n');
+				} while (flag);
 				// 暂停3秒继续游戏
 				Sleep(3000);
-				writeChar(47, 26, "                ");
-				writeChar(47, 27, "                ");
+				writeChar(47, 26, "                    ");
+				writeChar(47, 27, "                    ");
 				opp = tDir;
 			}
 		}
@@ -155,7 +159,7 @@ int moveSnack() {
 	for (int i = 1; i < len; i++) {
 		MAP[snack[i].X][snack[i].Y] = SPACE;
 	}
-
+	// 蛇身整体向后赋值
 	for (int i = len - 1; i >= 0; i--) {
 		snack[i + 1].X = snack[i].X;
 		snack[i + 1].Y = snack[i].Y;

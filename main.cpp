@@ -6,69 +6,19 @@
 
 // 主函数
 int main() {
-	char choice = 0; // 游戏选项
-	char cm = 0;     // 地图选项
-	int flag = 1;
-	// 初始化蛇
+
+	// 初始化控制台
 	initGame();
 	system("cls");
-	menu();
-
-	writeChar(18, 10, "请选择地图模式：");
-	writeChar(18, 12, "1. 默认模式");
-	writeChar(18, 14, "2. 自编辑模式");
-	// 选择地图
-	do {
-		cm = _getch();
-		switch (cm) {
-		case '1': {
-			system("cls");
-			initMap();
-			flag = 0;
-			break;
-		}
-		case '2': {
-			system("cls");
-			custoMap();
-			flag = 0;
-			break;
-		}
-		default:
-			writeChar(18, 16, "非法输入");
-			Sleep(300);
-			writeChar(18, 16, "          ");
-			break;
-		}
-	} while (flag);
+	// 欢迎界面
+	showFace();
+	// 选择模式
+	chooseMode();
+	// 画地图
 	drawMap();
+	// 加载logo和菜单
 	menu();
-
-	do {
-		choice = _getch();
-		switch (choice) {
-		case 新游戏: {
-			initSnack();
-			speed = choiceDiff();
-			startGame(speed);
-			break;
-		}
-				/*case 暂停继续: {}*/
-				// case 存档: {}
-		case 读档: {
-
-			writeChar(48, 28, "读档中...");
-			Sleep(500);
-			writeChar(48, 28, "          ");
-			loadArchives();
-			startGame(speed);
-			break;
-		}
-		case 结束游戏: {
-			exit(0);
-		}
-		default:
-			break;
-		}
-	} while (choice != 结束游戏);
+	// 选择菜单
+	chooseMenu();
 	return 0;
 }

@@ -2,14 +2,18 @@
 #include "Game.h"
 #include "Snack.h"
 #include <conio.h>
-#include <vector>
-#include <iostream>
+#include <stdlib.h>
+#include <time.h>
 #include <Windows.h>
+#include <iostream>
 
 int MAP[MAP_X][MAP_Y] = { 0 };
 int foodExist = 0;
+int food_X = 0;
+int food_Y = 0;
 unsigned int speed = 一般;
 std::vector<COORD> CMAP;
+
 
 // 定位坐标打印字符串
 void writeChar(int x, int y, const char* ch) {
@@ -19,6 +23,36 @@ void writeChar(int x, int y, const char* ch) {
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &set);
 	SetConsoleCursorPosition(hOut, pos);
 	std::cout << ch;
+}
+
+// 欢迎界面
+void showFace() {
+
+	std::cout << "               \\`.     ___" << std::endl;
+	std::cout << "               \\ \\   / __>0" << std::endl;
+	std::cout << "           /\\  /  |/' / " << std::endl;
+	std::cout << "          /  \\/   `  ,`'--." << std::endl;
+	std::cout << "         / /(___________)_ \\" << std::endl;
+	std::cout << "         |/ //.-.   .-.\\\\ \\ \\" << std::endl;
+	std::cout << "         0 // :@ ___ @: \\\\ \/" << std::endl;
+	std::cout << "           ( o ^(___)^ o ) 0" << std::endl;
+	std::cout << "            \\ \\_______/ /" << std::endl;
+	std::cout << "        /\\   '._______.'--." << std::endl;
+	std::cout << "        \\ /|  |<_____>    |" << std::endl;
+	std::cout << "         \\ \\__|<_____>____/|__" << std::endl;
+	std::cout << "          \\____<_____>_______/" << std::endl;
+	std::cout << "              |<_____>    |" << std::endl;
+	std::cout << "              |<_____>    |" << std::endl;
+	std::cout << "              :<_____>____:" << std::endl;
+	std::cout << "             / <_____>   /|" << std::endl;
+	std::cout << "            /  <_____>  / |" << std::endl;
+	std::cout << "           /___________/  |" << std::endl;
+	std::cout << "           |           | _|__" << std::endl;
+	std::cout << "           |   ____    | ---||_" << std::endl;
+	std::cout << "           |  |    |   |  | [__]" << std::endl;
+	std::cout << "           |      /    |  /" << std::endl;
+	std::cout << "           |     .     | /" << std::endl;
+	std::cout << "           |___________|/" << std::endl;
 }
 
 //LOGO
@@ -111,15 +145,15 @@ void mouseLoop() {
 			if (mosue_event.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
 			{
 				// 输出函数的坐标已经经过了转换，但是当前我们得到的坐标是控制台坐标
-				writeChar(point.X, point.Y, "■");
-				tempWall.X = point.X;
+				writeChar(point.X / 2, point.Y, "■");
+				tempWall.X = point.X / 2;
 				tempWall.Y = point.Y;
 				CMAP.push_back(tempWall);
 			}
 			// 假设按下了鼠标右键就擦除
 			else if (mosue_event.dwButtonState == RIGHTMOST_BUTTON_PRESSED)
 			{
-				writeChar(point.Y, point.X / 2, "  ");
+				writeChar(point.X / 2, point.Y, "  ");
 			}
 		}
 	}
@@ -138,6 +172,10 @@ void initMap() {
 			}
 		}
 	}
+}
+
+// 生成默认障碍物
+void initObstacle() {
 	// 设置障碍物
 	for (int i = 0; i < 7; i++) {
 		MAP[17 + i][15] = OBSTACLE;
@@ -162,7 +200,7 @@ void initMap() {
 // 自编辑地图
 void custoMap() {
 	mouseLoop();
-	int len = size(CMAP);
+	int len = CMAP.size();
 	int tx = 0, ty = 0;
 	for (int i = 0; i < len; i++) {
 		tx = CMAP[i].X;
@@ -183,11 +221,12 @@ void drawMap() {
 	}
 }
 
-// 生成食物
+ // 随机生成食物
 void createFood() {
+	srand((unsigned)time(NULL));
 	while (true) {
-		int food_X = rand() % 38 + 1;
-		int food_Y = rand() % 28 + 1;
+		food_X = rand() % 38 + 1;
+		food_Y = rand() % 28 + 1;
 		if (MAP[food_X][food_Y] == SPACE) {
 			MAP[food_X][food_Y] = FOOD;
 			writeChar(food_X, food_Y, "$");
@@ -234,7 +273,8 @@ void startGame(unsigned int speed) {
 		// 移动蛇
 		if (!moveSnack()) {
 			writeChar(15, 15, "GAME OVER!");
-			system("pause");
+			system("cls");
+			doAgain();
 		}
 		// 画蛇
 		drawSnack();
@@ -243,7 +283,10 @@ void startGame(unsigned int speed) {
 			createFood();
 		}
 		// 速度随着分数增加而变快（越来越难）
-		speed -= (score % 10);
+		speed -= ((score % 10)*50);
+		// 设定速度上限
+		if (speed < 50)
+			speed = 50;
 		Sleep(speed);
 	}
 }
@@ -257,7 +300,7 @@ void doArchives() {
 	fprintf(fp, "%d\t%c\t%d\t%d", speed, tDir, score, len);
 	// 回车分割
 	fprintf(fp, "\n");
-	// 获取蛇当前坐标
+	// 记录蛇当前坐标
 	int sx = 0, sy = 0;
 	for (int i = 0; i < len; i++) {
 		sx = snack[i].X;
@@ -266,7 +309,7 @@ void doArchives() {
 	}
 	// 回车分割
 	fprintf(fp, "\n");
-	// 获取障碍物当前坐标
+	// 记录障碍物当前坐标
 	for (int i = 0; i < MAP_X;  i++) {
 		for (int j = 0; j < MAP_Y; j++) {
 			if (MAP[i][j] == OBSTACLE) {
@@ -276,7 +319,7 @@ void doArchives() {
 	}
 	// 回车分割
 	fprintf(fp, "\n");
-	// 获取食物当前坐标
+	// 记录食物当前坐标
 	for (int i = 0; i < MAP_X; i++) {
 		for (int j = 0; j < MAP_Y; j++) {
 			if (MAP[i][j] == FOOD) {
@@ -317,17 +360,128 @@ void loadArchives() {
 			MAP[i][j] = OBSTACLE;
 		}
 	}
+	// 画地图
+	drawMap();
+
 	// 分割回车
 	fscanf_s(fp, "\n");
 
 	// 读取食物当前坐标
-	for (int i = 0; i < MAP_X; i++) {
-		for (int j = 0; j < MAP_Y; j++) {
-			fscanf_s(fp, "(%d,%d)", &i, &j);
-			MAP[i][j] = FOOD;
-		}
-	}
+	fscanf_s(fp, "(%d,%d)", &food_X, &food_Y);
+	// 食物存在，不要在生成
+	foodExist = 1;
+	// 标记食物
+	MAP[food_X][food_Y] = FOOD;
+
 	// 关闭文件
 	fclose(fp);
 	fp = NULL;
+}
+
+// 选择模式
+void chooseMode() {
+	char cm = 0;     // 模式选项
+	int flag = 1;
+	writeChar(18, 10, "请选择地图模式：");
+	writeChar(18, 12, "1. 默认模式");
+	writeChar(18, 14, "2. 自编辑模式");
+	do {
+		cm = _getch();
+		switch (cm) {
+		case '1': {
+			system("cls");
+			initMap();
+			initObstacle();
+			flag = 0;
+			break;
+		}
+		case '2': {
+			system("cls");
+			initMap();
+			custoMap();
+			flag = 0;
+			break;
+		}
+		default:
+			writeChar(18, 16, "非法输入");
+			Sleep(300);
+			writeChar(18, 16, "          ");
+			break;
+		}
+	} while (flag);
+}
+
+// 选择菜单
+void chooseMenu() {
+	char choice = 0; // 游戏选项
+	do {
+		choice = _getch();
+		switch (choice) {
+		case 新游戏: {
+			initSnack();
+			speed = choiceDiff();
+			startGame(speed);
+			break;
+		}
+				/*case 暂停继续: {}*/
+				// case 存档: {}
+		case 读档: {
+			writeChar(48, 28, "读档中...");
+			Sleep(500);
+			writeChar(48, 28, "          ");
+			loadArchives();
+			writeChar(food_X, food_Y, "$");
+			startGame(speed);
+			break;
+		}
+		case 结束游戏: {
+			exit(0);
+		}
+		default:
+			break;
+		}
+	} while (choice != 结束游戏);
+}
+
+// 是否回到主菜单
+void doAgain() {
+	showFace();
+	writeChar(18, 10, "蛇蛇挂掉了，大侠怎么说？");
+	writeChar(18, 12, "  1. 返回主菜单");
+	writeChar(18, 14, "  2. 离开游戏");
+	char choice = 0;
+	int flag = 0;
+	do {
+		choice = _getch();
+		switch (choice) {
+			case '1': {
+				system("cls");
+				score = 0;
+				foodExist = 0;
+				len = 4;
+				opp = RIGHT;
+				// 欢迎界面
+				showFace();
+				// 选择模式
+				chooseMode();
+				// 画地图
+				drawMap();
+				// 加载logo和菜单
+				menu();
+				// 选择菜单
+				chooseMenu();
+				flag = 0;
+				break;
+			}
+			case '2': {
+				exit(0);
+			}
+			default: {
+				writeChar(18, 16, "非法输入");
+				Sleep(500);
+				writeChar(18, 16, "          ");
+				break;
+			}
+		}
+	} while (flag);
 }
